@@ -17,6 +17,11 @@ This repository is the Kotlin + Jetpack Compose port of the iOS client
 - **Local mock mode** — the backend base URL is configuration-driven
   (`BuildConfig.BACKEND_BASE_URL`). With no server reachable the app falls back to local
   mock replies so the whole UI compiles and runs offline.
+- **UniFusion voice channel** — pick the **UniFusion** machine in the machine picker to talk
+  straight to the UniFusion cloud: each turn is POSTed to `/api/voice-sign/ingest` (header
+  `X-VoiceSign-Key`, body `{"text": "<turn>", "channel": "VOICE"}`) and the response's
+  `AGENT` messages are rendered as the harness reply. On network/HTTP failure the app shows
+  an explicit "channel unavailable" notice instead of a fake answer.
 
 ## Tech stack
 

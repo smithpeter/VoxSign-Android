@@ -1,8 +1,20 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
 }
+
+// Voice-sign ingest key for the UniFusion machine. The committed value below is a PLACEHOLDER
+// (empty string) — never commit a real key here. For local/debug builds you may inject it via
+// the gitignored `local.properties` (VOICE_SIGN_API_KEY=...) or an environment variable;
+// production should deliver it at runtime via SecureStorage / remote config instead of baking
+// it into the APK.
+val voiceSignApiKey: String = Properties().apply {
+    val localProps = rootProject.file("local.properties")
+    if (localProps.exists()) localProps.inputStream().use { load(it) }
+}.getProperty("VOICE_SIGN_API_KEY", "")
 
 android {
     namespace = "ai.voxsign.android"
@@ -19,6 +31,10 @@ android {
         // VoxSign cloud; when the endpoint is unreachable the app falls back to local mock data so
         // the UI is fully exercisable with no server.
         buildConfigField("String", "BACKEND_BASE_URL", "\"https://cloud.voxsign.ai\"")
+
+        // UniFusion voice-channel ingest key (placeholder in VCS; injected locally / delivered
+        // at runtime in production — see note above).
+        buildConfigField("String", "VOICE_SIGN_API_KEY", "\"${voiceSignApiKey.replace("\"", "\\\"")}\"")
     }
 
     buildTypes {

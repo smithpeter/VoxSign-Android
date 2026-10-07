@@ -31,7 +31,9 @@ class AppViewModel(private val backend: Backend) : ViewModel() {
     private val _inputText = MutableStateFlow("")
     val inputText: StateFlow<String> = _inputText.asStateFlow()
 
-    private val _machines = MutableStateFlow(listOf(SessionDefaults.DEFAULT_MACHINE))
+    private val _machines = MutableStateFlow(
+        listOf(SessionDefaults.DEFAULT_MACHINE, SessionDefaults.UNIFUSION_MACHINE)
+    )
     val machines: StateFlow<List<Machine>> = _machines.asStateFlow()
 
     private val _currentMachineId = MutableStateFlow(SessionDefaults.DEFAULT_MACHINE.id)
@@ -45,6 +47,7 @@ class AppViewModel(private val backend: Backend) : ViewModel() {
 
     init {
         ensureInitialSession()
+        backend.useMachine(currentMachine())
         viewModelScope.launch { backend.probe() }
     }
 
@@ -150,8 +153,9 @@ class AppViewModel(private val backend: Backend) : ViewModel() {
     // ---- machine switching ------------------------------------------------
 
     fun selectMachine(id: String) {
-        if (_machines.value.none { it.id == id }) return
+        val m = _machines.value.firstOrNull { it.id == id } ?: return
         _currentMachineId.value = id
+        backend.useMachine(m)
         viewModelScope.launch { backend.probe() }
     }
 
